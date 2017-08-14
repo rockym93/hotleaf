@@ -2,11 +2,11 @@
 import os
 import yaml
 
-pot = {}
+
 
 def scoop():
 	'''populate the pot with leaves'''
-	
+	pot = {}
 	links = next(os.walk('.'))[1]
 	links.sort()
 
@@ -16,24 +16,28 @@ def scoop():
 
 	for directory in os.walk('.'):
 		for filename in directory[2]:
-			if filename.split('.')[-1] == 'txt':
+			if os.path.splitext(filename)[1] == '.txt':
 				
-				stem = directory[0] + '/' + filename.rstrip('.txt')
+				stem = directory[0] + '/' + os.path.splitext(filename)[0]
 				leaf = {}
 				
-				leaf['modified'] = os.stat(filename).st_mtime
+				leaf['modified'] = os.stat(stem + '.txt').st_mtime
 				leaf['links'] = links
 				leaf['parent'] = stem.split('/')[0]
 				leaf['title'] = filename
 				
-				with open(filename, encoding='utf-8') as f:
-					
+				with open(stem + '.txt', encoding='utf-8') as f:
+					print(stem)
 					try:
-						leaf.update(next(yaml.load_all(f)))
-					except ScannerError:
+						metadata = next(yaml.load_all(f))
+						if type(metadata) == dict:
+							leaf.update(metadata)
+					except yaml.scanner.ScannerError:
 						pass
 
 				pot[stem] = leaf
+			
+	return pot
 	
 def strain():
 	'''sort the leaves in the pot'''
