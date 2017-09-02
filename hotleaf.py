@@ -24,7 +24,7 @@ def scoop():
 				leaf['modified'] = os.stat(stem + '.txt').st_mtime
 				leaf['links'] = links
 				leaf['parent'] = stem.split('/')[0]
-				leaf['title'] = filename
+				leaf['title'] = os.path.splitext(filename)[0]
 				
 				with open(stem + '.txt', encoding='utf-8') as f:
 					print(stem)
