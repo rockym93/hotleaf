@@ -39,15 +39,12 @@ def scoop():
 			
 	return pot
 	
-def strain(pot, keep, value=None): 
+def strain(pot, keep):
 	'''filter and sort the leaves in the pot'''
 	strained = []
 	for stem in pot:
 		if keep in pot[stem]:
-			if value == None:
-				strained.append((pot[stem][keep], stem))
-			elif pot[stem][keep] == value:
-				strained.append((pot[stem][keep], stem))
+			strained.append((pot[stem][keep], stem))
 
 	strained.sort()
 	return strained
