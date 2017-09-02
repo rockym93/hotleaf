@@ -3,7 +3,6 @@ import os
 import yaml
 
 
-
 def scoop():
 	'''populate the pot with leaves'''
 	pot = {}
@@ -21,6 +20,7 @@ def scoop():
 				stem = directory[0] + '/' + os.path.splitext(filename)[0]
 				leaf = {}
 				
+				leaf['stem'] = stem
 				leaf['modified'] = os.stat(stem + '.txt').st_mtime
 				leaf['links'] = links
 				leaf['parent'] = stem.split('/')[0]
@@ -34,18 +34,28 @@ def scoop():
 							leaf.update(metadata)
 					except yaml.scanner.ScannerError:
 						pass
-
+					
 				pot[stem] = leaf
 			
 	return pot
 	
-def strain():
-	'''sort the leaves in the pot'''
+def strain(pot, keep, value=None): 
+	'''filter and sort the leaves in the pot'''
+	strained = []
+	for stem in pot:
+		if keep in pot[stem]:
+			if value == None:
+				strained.append((pot[stem][keep], stem))
+			elif pot[stem][keep] == value:
+				strained.append((pot[stem][keep], stem))
+
+	strained.sort()
+	return strained
 	
 def infuse(leaf):
 	'''produce output from a given leaf'''
 
-def pour():
+def pour(pot):
 	'''infuse all leaves in the pot and distribute the output'''
 	
 def steep():
