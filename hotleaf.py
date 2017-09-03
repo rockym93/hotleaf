@@ -6,12 +6,6 @@ import yaml
 def scoop():
 	'''populate the pot with leaves'''
 	pot = {}
-	links = next(os.walk('.'))[1]
-	links.sort()
-
-	for l in list(links):
-		if l[0] == '.':
-			links.remove(l)
 
 	for directory in os.walk('.'):
 		for filename in directory[2]:
@@ -22,8 +16,7 @@ def scoop():
 				
 				leaf['stem'] = stem
 				leaf['modified'] = os.stat(stem + '.txt').st_mtime
-				leaf['links'] = links
-				leaf['parent'] = stem.split('/')[0]
+				leaf['roots'] = stem.split('/')
 				leaf['title'] = os.path.splitext(filename)[0]
 				
 				with open(stem + '.txt', encoding='utf-8') as f:
