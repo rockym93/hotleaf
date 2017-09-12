@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
-import yaml
-
+import markdown
+md = markdown.Markdown(extensions = ['markdown.extensions.meta'])
 
 def scoop():
 	'''populate the pot with leaves'''
@@ -21,12 +21,10 @@ def scoop():
 				
 				with open(stem + '.txt', encoding='utf-8') as f:
 					print(stem)
-					try:
-						metadata = next(yaml.load_all(f))
-						if type(metadata) == dict:
-							leaf.update(metadata)
-					except yaml.scanner.ScannerError:
-						pass
+					leaf['content'] = md.convert(f.read())
+
+					leaf.update(md.Meta)
+
 					
 				pot[stem] = leaf
 			
