@@ -22,7 +22,7 @@ def scoop():
 				with open(stem + '.txt', encoding='utf-8') as f:
 					print(stem)
 					leaf['content'] = md.convert(f.read())
-
+					leaf['summary'] = next(s for s in md.lines if s)
 					leaf.update(md.Meta)
 
 					
