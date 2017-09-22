@@ -2,6 +2,8 @@
 import os
 import markdown
 md = markdown.Markdown(extensions = ['markdown.extensions.meta'])
+import dateutil.parser as date
+
 
 def scoop():
 	'''populate the pot with leaves'''
@@ -24,6 +26,7 @@ def scoop():
 					leaf['content'] = md.convert(f.read())
 					leaf['summary'] = next(s for s in md.lines if s)
 					leaf.update(md.Meta)
+					leaf['date'] = date.parse(leaf['date'])
 
 					
 				pot[stem] = leaf
@@ -40,8 +43,17 @@ def strain(pot, keep):
 	strained.sort()
 	return strained
 	
-def infuse(leaf):
+def infuse(leaf, tleaf):
 	'''produce output from a given leaf'''
+	fused = tleaf.copy()
+	fused.update(leaf)
+	
+	fused['content'] = tleaf['content'].format(leaf)
+	
+	return fused
+	
+	
+			
 
 def pour(pot):
 	'''infuse all leaves in the pot and distribute the output'''
@@ -51,5 +63,4 @@ def steep():
 	
 def brew():
 	'''brew up a whole pot of tasty hot leaf juice'''
-	
 
