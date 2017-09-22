@@ -48,18 +48,31 @@ def infuse(leaf, tleaf):
 	fused = tleaf.copy()
 	fused.update(leaf)
 	
-	fused['content'] = tleaf['content'].format(leaf)
+	fused['content'] = tleaf['content'].format(fused)
 	
-	return fused
-	
-	
-			
+	return fused['content']
 
 def pour(pot):
 	'''infuse all leaves in the pot and distribute the output'''
 	
-def steep():
-	'''prepares, infuses and distributes special leaves'''
+def steep(leaf, tleaf, pot):
+	'''prepares special leaves'''
+	
+	length = int(leaf['index'][0])
+	search = str(leaf['index'][1])
+	
+	fused = tleaf.copy()
+	fused.update(leaf)
+	fused['content'] = str()
+	
+	for stem in strain(pot, search)[:length]:
+		fused['content'] += infuse(pot[stem[1]],leaf)
+	
+	fused['content'] = tleaf['content'].format(fused)
+	
+	return fused['content']
+	
+	
 	
 def brew():
 	'''brew up a whole pot of tasty hot leaf juice'''
