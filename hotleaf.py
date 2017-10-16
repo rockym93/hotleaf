@@ -48,7 +48,7 @@ def infuse(leaf, tleaf):
 	fused = tleaf.copy()
 	fused.update(leaf)
 	
-	fused['content'] = tleaf['content'].format(fused)
+	fused['content'] = tleaf['content'].format(**fused)
 	
 	return fused['content']
 
@@ -60,15 +60,25 @@ def steep(leaf, tleaf, pot):
 	
 	length = int(leaf['index'][0])
 	search = str(leaf['index'][1])
+	header = leaf['header']
+	
+	#This lets us use non-int parameters to list the whole lot
+	#(Slicing by None gives you the whole list.)
+	if type(length) is not int:
+		length = None
 	
 	fused = tleaf.copy()
 	fused.update(leaf)
 	fused['content'] = str()
 	
 	for stem in strain(pot, search)[:length]:
+		currentheader = header.format(**pot[stem[1]]
+		if currentheader != oldheader:
+			fused['content'] += currentheader
+		oldheader = currentheader
 		fused['content'] += infuse(pot[stem[1]],leaf)
 	
-	fused['content'] = tleaf['content'].format(fused)
+	fused['content'] = tleaf['content'].format(**fused)
 	
 	return fused['content']
 	
