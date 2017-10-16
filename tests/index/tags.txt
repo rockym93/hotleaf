@@ -1,0 +1,4 @@
+index: [all, tags]
+header: <h2>{tag}</h2>
+
+<a href="{slug}.html">{title}</a>

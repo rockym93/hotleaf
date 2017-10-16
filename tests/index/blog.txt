@@ -1,0 +1,7 @@
+index: [5, date]
+
+<div>
+<h2>{title}</h2>
+{date:%d}
+{content}
+</div>
