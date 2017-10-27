@@ -1,0 +1,5 @@
+blog: 2017-09-02
+
+This is not expected to work without a separator
+
+This is the minimum viable blog. The title will be filled in from the filename. The YAML frontmatter openng will be implied. It just straight up won't have any tags. The content should still, technically, be rendered just fine - and if I get the logic right, it will be included in the index for blog bits.

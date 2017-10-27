@@ -2,8 +2,7 @@
 import os
 import markdown
 md = markdown.Markdown(extensions = ['markdown.extensions.meta'])
-import dateutil.parser as date
-
+import yaml
 
 def scoop():
 	'''populate the pot with leaves'''
@@ -22,11 +21,19 @@ def scoop():
 				leaf['title'] = os.path.splitext(filename)[0]
 				
 				with open(stem + '.txt', encoding='utf-8') as f:
+
 					print(stem)
+					try:
+						metadata = next(yaml.load_all(f))
+						if type(metadata) == dict:
+							leaf.update(metadata)
+					except yaml.scanner.ScannerError:
+						pass
+						
+					f.seek(0)
 					leaf['content'] = md.convert(f.read())
 					leaf['summary'] = next(s for s in md.lines if s)
-					leaf.update(md.Meta)
-					leaf['date'] = date.parse(leaf['date'])
+
 
 					
 				pot[stem] = leaf
