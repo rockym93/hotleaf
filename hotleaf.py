@@ -48,7 +48,7 @@ def strain(pot, keep, reverse=False):
 		if keep in leaf:
 			strained.append(leaf)
 
-	strained.sort(reverse=reverse)
+	strained.sort(key=itemgetter(keep), reverse=reverse)
 	for i in range(len(strained)):
 		strained[i]['next_'+keep] = strained[i+1][1]
 		strained[i]['prev_'+keep] = strained[i-1][1]
@@ -61,17 +61,23 @@ def infuse(leaf, plate):
 	
 	fused['content'] = plate['content'].format(**fused)
 	
-	return fused['content']
+	return fused
 
-def pour(pot):
-	'''infuse all leaves in the pot and distribute the output'''
+def pour(leaf):
+	'''put an (infused) leaf in the right spot'''
+	with open(leaf['stem'] + '.html', 'w', encoding='utf-8',) as html:
+		html.write(leaf['content'])
+		
 	
 def steep(menu, plate, pot):
 	'''prepares special menu items'''
 	
-	search = str(menu['index'][1])
-	header = menu['header']
-	reverse = 'r' in menu['index']
+	search = str(menu['menu'][1])
+	if header in menu:
+		header = menu['header']
+	else:
+		header = str()
+	reverse = 'r' in menu['menu']
 
 	
 	#This lets us use non-int parameters to list the whole lot
@@ -79,7 +85,7 @@ def steep(menu, plate, pot):
 	if type(length) is not int:
 		length = None
 	else:
-		length = int(menu['index'][0])
+		length = int(menu['menu'][0])
 		
 	
 	fused = plate.copy()
@@ -95,10 +101,15 @@ def steep(menu, plate, pot):
 	
 	fused['content'] = plate['content'].format(**fused)
 	
-	return fused['content']
-	
-	
-	
-def brew():
-	'''brew up a whole pot of tasty hot leaf juice'''
+	return fused
 
+def brew(plate):
+	'''brew up a whole pot of tasty hot leaf juice'''
+	pot = scoop()
+	for leaf in pot:
+		pour(infuse(leaf, plate))
+	for menu in strain(pot, 'menu'):
+		pour(steep(menu, plate, pot))
+
+
+	
