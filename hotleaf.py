@@ -4,6 +4,31 @@ import markdown
 md = markdown.Markdown(extensions = ['markdown.extensions.meta'])
 import yaml
 
+def pick(filename):
+'''pick a leaf up from a file ready for brewing'''
+	stem = directory[0] + '/' + os.path.splitext(filename)[0]
+	leaf = {}
+	with open(stem + '.txt', encoding='utf-8') as f:
+		raw = f.read()
+	
+				
+	leaf['stem'] = stem
+	leaf['modified'] = os.stat(stem + '.txt').st_mtime
+	leaf['roots'] = stem.split('/')
+	leaf['title'] = os.path.splitext(filename)[0]
+	leaf['content'] = md.convert(raw)
+	leaf['summary'] = next(s for s in md.lines if s)
+	
+	try:
+		metadata = next(yaml.load_all(raw))
+		if type(metadata) == dict:
+			leaf.update(metadata)
+	except yaml.scanner.ScannerError:
+		pass
+	
+	return leaf
+
+
 def scoop():
 	'''populate the pot with leaves'''
 	pot = {}
@@ -11,32 +36,8 @@ def scoop():
 	for directory in os.walk('.'):
 		for filename in directory[2]:
 			if os.path.splitext(filename)[1] == '.txt':
-				
-				stem = directory[0] + '/' + os.path.splitext(filename)[0]
-				leaf = {}
-				
-				leaf['stem'] = stem
-				leaf['modified'] = os.stat(stem + '.txt').st_mtime
-				leaf['roots'] = stem.split('/')
-				leaf['title'] = os.path.splitext(filename)[0]
-				
-				with open(stem + '.txt', encoding='utf-8') as f:
-
-					print(stem)
-					try:
-						metadata = next(yaml.load_all(f))
-						if type(metadata) == dict:
-							leaf.update(metadata)
-					except yaml.scanner.ScannerError:
-						pass
-						
-					f.seek(0)
-					leaf['content'] = md.convert(f.read())
-					leaf['summary'] = next(s for s in md.lines if s)
-
-
-					
-				pot[stem] = leaf
+				leaf = pick(filename)
+				pot[leaf['stem']] = leaf
 			
 	return pot
 	
