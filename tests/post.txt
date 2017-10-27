@@ -1,6 +1,6 @@
 ---
 title: "Masters Thesis: ORIGINS"
-tags: [Coursework, Not coursework]
+tag: Not Coursework
 date: 2017-08-03
 ---
 

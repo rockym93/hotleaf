@@ -1,0 +1,5 @@
+menu: 
+  show: tag
+  header: <h2>{tag}</h2>
+...
+<a href="{stem}.html">{title}</a>

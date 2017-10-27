@@ -1,0 +1,6 @@
+menu: 
+  show: date
+  header: <h2>{date:%Y}</h2>
+...
+
+{date:%d} - <a href="{stem}.html">{title}</a>
