@@ -33,14 +33,18 @@ def scoop():
 			
 	return pot
 	
-def strain(pot, keep):
+def strain(pot, keep, reverse=False):
 	'''filter and sort the leaves in the pot'''
 	strained = []
 	for stem in pot:
 		if keep in pot[stem]:
 			strained.append((pot[stem][keep], stem))
 
-	strained.sort()
+	strained.sort(reverse=reverse)
+	for i in range(len(strained)):
+		leaf = pot[strained[i][1]]
+		leaf['next_'+keep] = strained[i+1][1]
+		leaf['prev_'+keep] = strained[i-1][1]
 	return strained
 	
 def infuse(leaf, tleaf):
