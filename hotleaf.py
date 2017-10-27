@@ -3,6 +3,7 @@ import os
 import markdown
 md = markdown.Markdown(extensions = ['markdown.extensions.meta'])
 import yaml
+from operator import itemgetter
 
 def pick(filename):
 '''pick a leaf up from a file ready for brewing'''
@@ -31,66 +32,68 @@ def pick(filename):
 
 def scoop():
 	'''populate the pot with leaves'''
-	pot = {}
+	pot = []
 
 	for directory in os.walk('.'):
 		for filename in directory[2]:
 			if os.path.splitext(filename)[1] == '.txt':
-				leaf = pick(filename)
-				pot[leaf['stem']] = leaf
+				pot.append(pick(filename))
 			
 	return pot
 	
 def strain(pot, keep, reverse=False):
 	'''filter and sort the leaves in the pot'''
 	strained = []
-	for stem in pot:
-		if keep in pot[stem]:
-			strained.append((pot[stem][keep], stem))
+	for leaf in pot:
+		if keep in leaf:
+			strained.append(leaf)
 
 	strained.sort(reverse=reverse)
 	for i in range(len(strained)):
-		leaf = pot[strained[i][1]]
-		leaf['next_'+keep] = strained[i+1][1]
-		leaf['prev_'+keep] = strained[i-1][1]
+		strained[i]['next_'+keep] = strained[i+1][1]
+		strained[i]['prev_'+keep] = strained[i-1][1]
 	return strained
 	
-def infuse(leaf, tleaf):
+def infuse(leaf, plate):
 	'''produce output from a given leaf'''
-	fused = tleaf.copy()
+	fused = plate.copy()
 	fused.update(leaf)
 	
-	fused['content'] = tleaf['content'].format(**fused)
+	fused['content'] = plate['content'].format(**fused)
 	
 	return fused['content']
 
 def pour(pot):
 	'''infuse all leaves in the pot and distribute the output'''
 	
-def steep(leaf, tleaf, pot):
-	'''prepares special leaves'''
+def steep(menu, plate, pot):
+	'''prepares special menu items'''
 	
-	length = int(leaf['index'][0])
-	search = str(leaf['index'][1])
-	header = leaf['header']
+	search = str(menu['index'][1])
+	header = menu['header']
+	reverse = 'r' in menu['index']
+
 	
 	#This lets us use non-int parameters to list the whole lot
 	#(Slicing by None gives you the whole list.)
 	if type(length) is not int:
 		length = None
+	else:
+		length = int(menu['index'][0])
+		
 	
-	fused = tleaf.copy()
-	fused.update(leaf)
+	fused = plate.copy()
+	fused.update(menu)
 	fused['content'] = str()
 	
-	for stem in strain(pot, search)[:length]:
-		currentheader = header.format(**pot[stem[1]]
+	for leaf in strain(pot, search, reverse)[:length]:
+		currentheader = header.format(leaf)
 		if currentheader != oldheader:
 			fused['content'] += currentheader
 		oldheader = currentheader
-		fused['content'] += infuse(pot[stem[1]],leaf)
+		fused['content'] += infuse(leaf,menu)
 	
-	fused['content'] = tleaf['content'].format(**fused)
+	fused['content'] = plate['content'].format(**fused)
 	
 	return fused['content']
 	
