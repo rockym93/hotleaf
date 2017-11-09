@@ -105,7 +105,7 @@ def steep(menu, pot, plate=None):
 	
 	return fused
 
-def brew(plate):
+def brew(plate=None):
 	'''brew up a whole pot of tasty hot leaf juice'''
 	pot = scoop('.txt')
 	for leaf in pot:
@@ -117,4 +117,4 @@ def brew(plate):
 
 
 if __name__ == "__main__":
-	brew(pick('.template'))
+	brew()
