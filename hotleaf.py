@@ -16,6 +16,7 @@ def pick(filename):
 	leaf['title'] = leaf['roots'][-1]
 	leaf['content'] = md.convert(raw)
 	leaf['summary'] = next(s for s in md.lines if s)
+	leaf['template'] = '.template'
 	
 	try:
 		metadata = next(yaml.load_all(raw))
@@ -54,8 +55,10 @@ def strain(pot, keep, reverse=False):
 			strained[i]['prev_'+keep] = strained[i-1]['stem']
 	return strained
 	
-def infuse(leaf, plate):
-	'''produce output from a given leaf'''
+def infuse(leaf, plate=None):
+	'''produce output from a given leaf. can optionally use another leaf as a template.'''
+	if not plate:
+		plate = pick(leaf['template'])
 	fused = plate.copy()
 	fused.update(leaf)
 	
@@ -69,8 +72,10 @@ def pour(leaf):
 		html.write(leaf['content'])
 		
 	
-def steep(menu, plate, pot):
-	'''prepares special menu items'''
+def steep(menu, pot, plate=None):
+	'''prepares special menu items. can optionally use another leaf as a template.'''
+	if not plate:
+		plate = pick(menu['template'])
 	parameters = {
 	'show':'title', 
 	'length': None, 
@@ -105,7 +110,7 @@ def brew(plate):
 		pour(infuse(leaf, plate))
 	for menu in scoop('.menu'):
 		print(menu['stem'])
-		pour(steep(menu, plate, pot))
+		pour(steep(menu, pot, plate))
 
 
 if __name__ == "__main__":
