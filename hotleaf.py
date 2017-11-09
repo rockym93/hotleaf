@@ -12,6 +12,7 @@ def pick(filename):
 		raw = f.read()
 	
 	leaf['stem'] = os.path.splitext(filename)[0]
+	leaf['tip'] = '.html'
 	leaf['roots'] = leaf['stem'].split('/')
 	leaf['title'] = leaf['roots'][-1]
 	leaf['content'] = md.convert(raw)
@@ -68,7 +69,7 @@ def infuse(leaf, plate=None):
 
 def pour(leaf):
 	'''put an (infused) leaf in the right spot'''
-	with open(leaf['stem'] + '.html', 'w', encoding='utf-8',) as html:
+	with open(leaf['stem'] + leaf['tip'], 'w', encoding='utf-8',) as html:
 		html.write(leaf['content'])
 		
 	
