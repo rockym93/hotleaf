@@ -59,8 +59,9 @@ def strain(pot, keep, reverse=False):
 def infuse(leaf, plate=None):
 	'''produce output from a given leaf. can optionally use another leaf as a template.'''
 	if not plate:
-		plate = pick(leaf['template'])
-	fused = plate.copy()
+		fused = pick(leaf['template'])
+	else:
+		fused = plate.copy()
 	fused.update(leaf)
 	
 	fused['content'] = plate['content'].format(**fused)
@@ -76,7 +77,10 @@ def pour(leaf):
 def steep(menu, pot, plate=None):
 	'''prepares special menu items. can optionally use another leaf as a template.'''
 	if not plate:
-		plate = pick(menu['template'])
+		fused = pick(menu['template'])
+	else:
+		fused = plate.copy()
+	
 	parameters = {
 	'show':'title', 
 	'length': None, 
@@ -84,8 +88,6 @@ def steep(menu, pot, plate=None):
 	'header':str() }
 	
 	parameters.update(**menu['menu'])
-	
-	fused = plate.copy()
 	fused.update(menu)
 	fused['content'] = str()
 	
