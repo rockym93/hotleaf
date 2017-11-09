@@ -109,6 +109,4 @@ def brew(plate):
 
 
 if __name__ == "__main__":
-	import argparse
-	parser = argparse.ArgumentParser()
-
+	brew(pick('.template'))
