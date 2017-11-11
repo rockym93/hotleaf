@@ -33,7 +33,14 @@ Hot Leaf Juice turns text files into html files with the same name. Those text f
 
 At the start of each file, you can put some YAML. This will let you set different bits of metadata for that page. These might be tags, or dates, or navigational elements, which need to be different on every page, and that you don't want to hand-write in.
 
-Once you're done setting your data, end the YAML document with three dots (...) or three dashes (---). Then start your actual document.
+Start this section with three dashes (---), on the very first line of your file. YAML can be a bit complex, but the gist of it is that you have names and values, separated by a colon:
+
+  ---
+  title: Example Page
+  date: 2017-10-31
+  ---
+  
+Once you're done setting your data, end the YAML document with three dashes (---). Then start your actual document.
 
 In the main part of your document, you can reference any metadata you've set in the document, any metadata set in the template, and any metadata that Hot Leaf Juice sets automatically. Data from the document overwrites automatic data, and both overwrite data from the template.
 

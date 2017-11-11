@@ -1,0 +1,12 @@
+---
+title: YAML torture test
+tag: Tests
+---
+things yaml doesn't like:
+[square brackets]
+lines that end in colons:
+
+Unicode characters 🤔
+	lines with tabs in them
+
+If anything on this page breaks, yaml is processing something it shouldn't.

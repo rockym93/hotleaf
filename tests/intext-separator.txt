@@ -1,0 +1,15 @@
+---
+blog: 2017-09-02
+---
+
+This is a test to make sure separators work in Markdown.
+
+---
+
+Whoever decided that making the standard frontmatter separator the same as a bit of markdown syntax was an idiot.
+
+---
+
+These should appear as horizontal rules (or &lt;hr&gt; elements). If they don't, something is wrong.
+
+---

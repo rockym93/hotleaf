@@ -1,7 +1,8 @@
+---
 menu: 
   show: date
   length: 5
-...
+---
 <div>
 <h2>{title}</h2>
 {date:%d}
