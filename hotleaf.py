@@ -41,7 +41,7 @@ def scoop(tip):
 		for filename in directory[2]:
 			if os.path.splitext(filename)[1] == tip:
 				path = directory[0] + '/' + filename
-				print(path)
+				print('picking: ' + path)
 				pot.append(pick(path))
 			
 	return pot
@@ -64,6 +64,7 @@ def strain(pot, keep, reverse=False):
 	
 def infuse(leaf, plate=None):
 	'''produce output from a given leaf. can optionally use another leaf as a template.'''
+	print('infusing: ' + leaf['stem'])
 	if not plate:
 		plate = pick(leaf['template'])
 	
@@ -71,7 +72,6 @@ def infuse(leaf, plate=None):
 	fused.update(leaf)
 	
 	fused['content'] = plate['content'].format(**fused)
-	
 	return fused
 
 def pour(leaf):
@@ -82,6 +82,7 @@ def pour(leaf):
 	
 def steep(menu, pot, plate=None):
 	'''prepares special menu items. can optionally use another leaf as a template.'''
+	print('steeping: ' + menu['stem'])
 	if not plate:
 		plate = pick(menu['template'])
 
@@ -104,7 +105,7 @@ def steep(menu, pot, plate=None):
 		except UnboundLocalError:
 			fused['content'] += currentheader
 		oldheader = currentheader
-		fused['content'] += infuse(leaf,menu)['content']
+		fused['content'] += infuse(leaf,fused)['content']
 	
 	fused['content'] = plate['content'].format(**fused)
 	
