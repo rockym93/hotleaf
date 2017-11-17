@@ -1,9 +1,41 @@
 #!/usr/bin/env python3
 import os
 import markdown
-md = markdown.Markdown()
+
 import yaml
 from operator import itemgetter
+
+class Chest():
+	'''a box to store bulky bits of leaves until they're needed'''
+	def __init__(self, filename):
+		self.filename = filename
+	def __repr__(self):
+		return 'Chest("'+self.filename+'")'
+	def __str__(self):
+		with open(self.filename, encoding='utf-8') as f:
+			return markdown.markdown(grade(f.read())[0])
+#	def __format__(self):
+#		with open(self.filename, encoding='utf-8') as f:
+#			return markdown.markdown(grade(f.read())[0])
+		
+class InfuseList(list):
+	'''a list that can format each of its members'''
+	def __format__(self, formatstring):
+		returnstring = ''
+		for i in self:
+			returnstring += formatstring.format(str(i))
+		return returnstring
+		
+
+def grade(raw):
+	'''separate raw materials into metadata and text content'''
+	broken = raw.split('---', maxsplit=2)
+	if broken[0] == '':
+		meta = yaml.load(broken[1])
+		raw = broken[2]	
+	else:
+		meta = {}
+	return raw, meta
 
 def pick(filename):
 	'''pick a leaf up from a file ready for brewing'''
@@ -11,25 +43,24 @@ def pick(filename):
 	with open(filename, encoding='utf-8') as f:
 		raw = f.read()
 	
-	#Separate metadata from markdown
-	broken = raw.split('---', maxsplit=2)
-	if broken[0] == '':
-		meta = yaml.load(broken[1])
-		raw = broken[2]	
-	else:
-		meta = {}
-	
+	raw, meta = grade(raw)
+		
 	#Set some sensible defaults
 	leaf['stem'] = os.path.splitext(filename)[0]
 	leaf['tip'] = '.html'
 	leaf['roots'] = leaf['stem'].split('/')
 	leaf['title'] = leaf['roots'][-1]
-	leaf['content'] = md.convert(raw)
-	leaf['summary'] = next(s for s in md.lines if s)
+	leaf['content'] = Chest(filename)
+	leaf['summary'] = raw.strip().split('\n')[0]
 	leaf['template'] = '.template'
 	
 	#Replace those defaults with page-specific content
 	leaf.update(meta)
+	
+	for i in leaf:
+		if type(leaf[i]) is list:
+			leaf[i] = InfuseList(leaf[i])
+			
 	return leaf
 
 
@@ -41,6 +72,7 @@ def scoop(tip):
 		for filename in directory[2]:
 			if os.path.splitext(filename)[1] == tip:
 				path = directory[0] + '/' + filename
+				path = path.split('./',1)[1]
 				print('picking: ' + path)
 				pot.append(pick(path))
 			
@@ -71,7 +103,7 @@ def infuse(leaf, plate=None):
 	fused = plate.copy()
 	fused.update(leaf)
 	
-	fused['content'] = plate['content'].format(**fused)
+	fused['content'] = str(plate['content']).format(**fused)
 	return fused
 
 def pour(leaf):
@@ -95,19 +127,20 @@ def steep(menu, pot, plate=None):
 	parameters.update(**menu['menu'])
 	fused = plate.copy()
 	fused.update(menu)
-	fused['content'] = str()
 	
+	content = ''
 	for leaf in strain(pot, parameters['show'], parameters['reverse'])[:parameters['length']]:
 		currentheader = parameters['header'].format(**leaf)
 		try:
 			if currentheader != oldheader:
-				fused['content'] += currentheader
+				content += currentheader
 		except UnboundLocalError:
-			fused['content'] += currentheader
+			content += currentheader
 		oldheader = currentheader
-		fused['content'] += infuse(leaf,fused)['content']
+		content += infuse(leaf,fused)['content']
+	fused['content'] = content
 	
-	fused['content'] = plate['content'].format(**fused)
+	fused['content'] = str(plate['content']).format(**fused)
 	
 	return fused
 
