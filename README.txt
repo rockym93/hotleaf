@@ -1,8 +1,9 @@
-Hot Leaf Juice
-==============
-A really basic static site generator.
-
-<https://www.rockym93.net/code/hotleaf/> | <rockwell@mcgell.in>
+---
+title: Hot Leaf Juice
+summary: A really basic static site generator.
+image: /code/hotleaf.png
+---
+<https://github.com/rockym93/hotleaf>
 
 
 What is Hot Leaf Juice?
@@ -104,7 +105,18 @@ Hot Leaf Juice should be pretty easy to repurpose. You can import it into your o
 
 It's broken up into functions, and they're all pretty self explanatory - if slightly whimsically named. 
 
-If you have any questions, feel free to shoot me an email at hotleaf@rockym93.net.
+This is actually how I use Hot Leaf Juice: I have a separate script of a couple of lines that builds my site the way I want it to, doing different subsets of pages with different templates. That script looks a bit like this:
+   
+  #!/usr/bin/env python3
+  import hotleaf
+  
+  hotleaf.brew()
+  
+  plate = hotleaf.pick('blog/blog.template')
+  for blog in hotleaf.strain(hotleaf.scoop('.txt'), 'blog'):
+    hotleaf.pour(hotleaf.infuse(blog, plate))
+
+If you have any questions, or if you end up using Hot Leaf Juice for your own site, feel free to shoot me an email at hotleaf@rockym93.net.
 
 License
 -------
@@ -118,3 +130,6 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+[1]: https://daringfireball.net/projects/markdown/
+[2]: https://www.staticgen.com/

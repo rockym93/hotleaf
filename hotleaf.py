@@ -88,6 +88,16 @@ def strain(pot, keep, reverse=False):
 	strained.sort(key=itemgetter(keep), reverse=reverse)
 	for i in range(len(strained)):
 		strained[i]['pos_'+keep] = str(i)
+		
+		try: 
+			del(strained[i]['next_'+keep])
+		except KeyError:
+			pass
+		try: 
+			del(strained[i]['prev_'+keep])
+		except KeyError:
+			pass
+		
 		if i+1 < len(strained):
 			strained[i]['next_'+keep] = strained[i+1]['stem']
 		if i+1 > 1:
@@ -102,7 +112,7 @@ def infuse(leaf, plate=None):
 	
 	fused = plate.copy()
 	fused.update(leaf)
-	
+	fused['content'] = str(fused['content']).format(**fused)
 	fused['content'] = str(plate['content']).format(**fused)
 	return fused
 
@@ -139,7 +149,6 @@ def steep(menu, pot, plate=None):
 		oldheader = currentheader
 		content += infuse(leaf,fused)['content']
 	fused['content'] = content
-	
 	fused['content'] = str(plate['content']).format(**fused)
 	
 	return fused
