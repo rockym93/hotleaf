@@ -112,7 +112,7 @@ def infuse(leaf, plate=None):
 	
 	fused = plate.copy()
 	fused.update(leaf)
-	fused['content'] = str(fused['content']).format(**fused)
+	#fused['content'] = str(fused['content']).format(**fused)
 	fused['content'] = str(plate['content']).format(**fused)
 	return fused
 
