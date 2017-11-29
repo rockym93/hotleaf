@@ -43,7 +43,11 @@ Start this section with three dashes (---), on the very first line of your file.
   
 Once you're done setting your data, end the YAML document with three dashes (---). Then start your actual document.
 
-In the main part of your document, you can reference any metadata you've set in the document, any metadata set in the template, and any metadata that Hot Leaf Juice sets automatically. Data from the document overwrites automatic data, and both overwrite data from the template.
+Templates
+---------
+Templates are the files that your content gets pasted into. Like pages, they start with a metadata section. This lets you set some default values.
+
+In the main part of your template, you can reference any metadata you've set in the document, any metadata set in the template, and any metadata that Hot Leaf Juice sets automatically. Data from the document overwrites automatic data, and both overwrite data from the template.
 
 Metadata goes between curly braces. If you had a variable called 'tag', you could reference it like this:
 
