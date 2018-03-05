@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 import os
 import markdown
+import sandwich
+import datetime
+import json
 
-import yaml
 from operator import itemgetter
 
 class Chest():
@@ -39,23 +41,27 @@ def grade(raw):
 
 def pick(filename):
 	'''pick a leaf up from a file ready for brewing'''
-	leaf = {}
 	with open(filename, encoding='utf-8') as f:
-		raw = f.read()
+		leaf = sandwich.load(f.read())
 	
-	raw, meta = grade(raw)
-		
 	#Set some sensible defaults
 	leaf['stem'] = os.path.splitext(filename)[0]
 	leaf['tip'] = '.html'
 	leaf['roots'] = leaf['stem'].split('/')
-	leaf['title'] = leaf['roots'][-1]
-	leaf['content'] = Chest(filename)
-	leaf['summary'] = raw.strip().split('\n')[0]
+	leaf['summary'] = leaf['text'].strip().split('\n')[0]
 	leaf['template'] = '.template'
+
+	if not leaf['title']:
+		leaf['title'] = leaf['roots'][-1]
+	if not leaf['timestamp']:
+		leaf['timestamp'] = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
+	
+	leaf['text'] = markdown.markdown(leaf['text'])
+	
 	
 	#Replace those defaults with page-specific content
-	leaf.update(meta)
+	with open(leaf['stem']+'.json') as f:
+		leaf.update(json.load(f))
 	
 	for i in leaf:
 		if type(leaf[i]) is list:
