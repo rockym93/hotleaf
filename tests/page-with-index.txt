@@ -1,0 +1,7 @@
+# This page has an index.
+
+Here are all the pages tagged with #test:
+
+{index[#test]:<a href="{{slug}}.html">{{title}}</a>}
+
+#test

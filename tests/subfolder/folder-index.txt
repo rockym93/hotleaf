@@ -1,0 +1,7 @@
+# This page has an index.
+
+Here are all the pages under the subfolder /subfolder:
+
+{index[/subfolder]:<a href="{{slug}}.html">{{title}}</a>}
+
+#misc

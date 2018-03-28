@@ -46,9 +46,9 @@ class Navigator():
 	def __getitem__(self, search):
 		searched = list(self.pot[search])
 		index = searched.index(self.leaf)
-		if direction == 'prev':
+		if self.direction == 'prev':
 			return searched[index+1]
-		elif direction == 'next':
+		elif self.direction == 'next':
 			return searched[index-1]
 
 
@@ -108,12 +108,7 @@ def scoop(tip='.txt'):
 	
 def infuse(leaf, plate):
 	'''produce output from a given leaf. can optionally use another leaf as a template.'''
-	#Okay, I'm keeping it. After all, infusing isn't something a leaf does to itself,
-	#it's something you do to a leaf. Let's try and keep at least some of the metaphor.
-	
-	#What I am changing is that we're switching from template-as-override to template-as-default
-	#The default is set here (meaning we can load it once and use it over and over) and if there's
-	#an override, it should be set by the file rather than by the program. If that makes sense.
+
 	print('infusing: ' + leaf['stem'])
 	if leaf['template']:
 		plate = pick(leaf['template'])
@@ -130,15 +125,14 @@ def pour(leaf):
 		html.write(leaf['text'])
 		
 
-def brew(plate=None):
+def brew(plate):
 	'''brew up a whole pot of tasty hot leaf juice'''
 	pot = scoop('.txt')
-	for menu in scoop('.menu'):
-		pour(steep(menu, pot, plate))
 	for leaf in pot:
 		pour(infuse(leaf, plate))
 
 
 
 if __name__ == "__main__":
-	brew()
+	plate = pick('.template')	#TODO: Have this set from command line parameters.
+	brew(plate)

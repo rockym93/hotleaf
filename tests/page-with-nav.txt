@@ -1,0 +1,8 @@
+# This page has navigation.
+
+Some super generic page content goes here
+
+<a href="{prev[#test]:{{slug}}}.html">Previous</a>
+<a href="{next[#test]:{{slug}}}.html">Next</a>
+
+#test

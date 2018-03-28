@@ -1,0 +1,7 @@
+# This page has some of its data overridden
+
+We're going to overwrite some of the metadata on this page.
+Rather than showing the page title, it's going to show the variables defined in
+[the .json file of the same name](page-with-sidecar.json)
+
+#test
