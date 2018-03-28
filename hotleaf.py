@@ -18,11 +18,14 @@ class Stem(str):
 		return self.split('/')[index]
 
 class InfuseList(list):
-	'''a list that can format each of its members'''
+	'''a list that can infuse each of its members'''
 	def __format__(self, formatstring):
 		returnstring = ''
-		for leaf in self:
-			returnstring += formatstring.format(**leaf)
+		for i in self:
+			try:
+				returnstring += formatstring.format(**i)
+			except SyntaxError:
+				returnstring += formatstring.format(i)
 		return returnstring
 	def __getitem__(self, search):
 		return [i for i in self if search in i]
@@ -33,7 +36,7 @@ class Indexer(InfuseList):
 		if search[0] == '#': # tag
 			return InfuseList([leaf for leaf in self if search[1:] in leaf['tags']])
 		elif search[0] == '/': # path
-			return InfuseList([leaf for leaf in self if search.[1:] in str(leaf['stem'])])
+			return InfuseList([leaf for leaf in self if search[1:] in str(leaf['stem'])])
 
 class Navigator():
 	def __init__(self, leaf, direction, pot):
@@ -47,17 +50,10 @@ class Navigator():
 			return searched[index+1]
 		elif direction == 'next':
 			return searched[index-1]
-	def __format__(self, formatstring):
-
-tools = {}
-tools['index'] = Indexer
 
 
 
-
-
-
-def pick(filename):
+def pick(filename, pot=[]):
 	'''pick a leaf up from a file ready for brewing'''
 	with open(filename, encoding='utf-8') as f:
 		leaf = Leaf(sandwich.load(f.read()))
@@ -74,6 +70,7 @@ def pick(filename):
 		leaf['timestamp'] = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
 	
 	leaf['text'] = markdown.markdown(leaf['text'])
+	leaf['tags'] = InfuseList(leaf['tags'])
 	
 	if os.path.exists(str(stem) + '.jpg'):
 		leaf['image'] = str(stem) + '.jpg'
@@ -85,7 +82,12 @@ def pick(filename):
 	#Replace those defaults with page-specific text
 	with open(leaf['stem']+'.json') as f:
 		leaf.update(json.load(f))
-			
+
+	#Add some helpers:
+	leaf['prev'] = Navigator(leaf,'prev', pot)]
+	leaf['next'] = Navigator(leaf,'next', pot)]
+	leaf['index'] = Indexer(pot)]
+
 	return leaf
 
 
@@ -106,6 +108,12 @@ def scoop(tip='.txt'):
 	
 def infuse(leaf, plate=None):
 	'''produce output from a given leaf. can optionally use another leaf as a template.'''
+	#The actual main point of this function, and the reason we don't just use a format() instead,
+	#is becuase we have to merge a bunch of default values. If we didn't need to do that...
+	#Hmm. Okay. Do I even need default values any more? Or am I setting those from the file?
+	#I've simplified the metadata structure quite a lot - we're not really working with arbitrary 
+	#data from the file any more. The only reason to keep this function is so we can set some defaults
+	#in the template purely for the purpose of reassigning them later. 
 	print('infusing: ' + leaf['stem'])
 	if not plate:
 		plate = pick(leaf['template'])

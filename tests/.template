@@ -9,6 +9,6 @@ license: Copyright
 </head>
 <body>
 <h1>{title}</h1>
-{content}
+{text}
 </body>
 </html>
