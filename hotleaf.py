@@ -7,47 +7,64 @@ import json
 
 from operator import itemgetter
 
-class Chest():
-	'''a box to store bulky bits of leaves until they're needed'''
-	def __init__(self, filename):
-		self.filename = filename
-	def __repr__(self):
-		return 'Chest("'+self.filename+'")'
-	def __str__(self):
-		with open(self.filename, encoding='utf-8') as f:
-			return markdown.markdown(grade(f.read())[0])
-#	def __format__(self):
-#		with open(self.filename, encoding='utf-8') as f:
-#			return markdown.markdown(grade(f.read())[0])
-		
+class Leaf(dict):
+	def __format__(self, formatstring):
+		return formatstring.format(**self)
+	def __missing__(self, key):
+		return ''
+
+class Stem(str):
+	def __getitem__(self, index):
+		return self.split('/')[index]
+
 class InfuseList(list):
 	'''a list that can format each of its members'''
 	def __format__(self, formatstring):
 		returnstring = ''
-		for i in self:
-			returnstring += formatstring.format(str(i))
+		for leaf in self:
+			returnstring += formatstring.format(**leaf)
 		return returnstring
-		
+	def __getitem__(self, search):
+		return [i for i in self if search in i]
 
-def grade(raw):
-	'''separate raw materials into metadata and text content'''
-	broken = raw.split('---', maxsplit=2)
-	if broken[0] == '':
-		meta = yaml.load(broken[1])
-		raw = broken[2]	
-	else:
-		meta = {}
-	return raw, meta
+class Indexer(InfuseList):
+	'''a list which gets items by search string, rather than by index'''
+	def __getitem__(self, search):
+		if search[0] == '#': # tag
+			return InfuseList([leaf for leaf in self if search[1:] in leaf['tags']])
+		elif search[0] == '/': # path
+			return InfuseList([leaf for leaf in self if search.[1:] in str(leaf['stem'])])
+
+class Navigator():
+	def __init__(self, leaf, direction, pot):
+		self.leaf = leaf
+		self.direction = direction
+		self.pot = Indexer(pot)
+	def __getitem__(self, search):
+		searched = list(self.pot[search])
+		index = searched.index(self.leaf)
+		if direction == 'prev':
+			return searched[index+1]
+		elif direction == 'next':
+			return searched[index-1]
+	def __format__(self, formatstring):
+
+tools = {}
+tools['index'] = Indexer
+
+
+
+
+
 
 def pick(filename):
 	'''pick a leaf up from a file ready for brewing'''
 	with open(filename, encoding='utf-8') as f:
-		leaf = sandwich.load(f.read())
+		leaf = Leaf(sandwich.load(f.read()))
 	
 	#Set some sensible defaults
-	leaf['stem'] = os.path.splitext(filename)[0]
+	leaf['stem'] = Stem(os.path.splitext(filename)[0])
 	leaf['tip'] = '.html'
-	leaf['roots'] = leaf['stem'].split('/')
 	leaf['summary'] = leaf['text'].strip().split('\n')[0]
 	leaf['template'] = '.template'
 
@@ -58,19 +75,21 @@ def pick(filename):
 	
 	leaf['text'] = markdown.markdown(leaf['text'])
 	
+	if os.path.exists(str(stem) + '.jpg'):
+		leaf['image'] = str(stem) + '.jpg'
+	elif os.path.exists(str(stem) + '.png'):
+		leaf['image'] = str(stem) + '.png'
+	else:
+		leaf['image'] = "favicon.png"
 	
-	#Replace those defaults with page-specific content
+	#Replace those defaults with page-specific text
 	with open(leaf['stem']+'.json') as f:
 		leaf.update(json.load(f))
-	
-	for i in leaf:
-		if type(leaf[i]) is list:
-			leaf[i] = InfuseList(leaf[i])
 			
 	return leaf
 
 
-def scoop(tip):
+def scoop(tip='.txt'):
 	'''populate the pot with leaves'''
 	pot = []
 
@@ -82,33 +101,8 @@ def scoop(tip):
 				print('picking: ' + path)
 				pot.append(pick(path))
 			
+	pot.sort(key=itemgetter('date'), reverse=True)
 	return pot
-	
-def strain(pot, keep, reverse=False):
-	'''filter and sort the leaves in the pot'''
-	strained = []
-	for leaf in pot:
-		if keep in leaf:
-			strained.append(leaf)
-
-	strained.sort(key=itemgetter(keep), reverse=reverse)
-	for i in range(len(strained)):
-		strained[i]['pos_'+keep] = str(i)
-		
-		try: 
-			del(strained[i]['next_'+keep])
-		except KeyError:
-			pass
-		try: 
-			del(strained[i]['prev_'+keep])
-		except KeyError:
-			pass
-		
-		if i+1 < len(strained):
-			strained[i]['next_'+keep] = strained[i+1]['stem']
-		if i+1 > 1:
-			strained[i]['prev_'+keep] = strained[i-1]['stem']
-	return strained
 	
 def infuse(leaf, plate=None):
 	'''produce output from a given leaf. can optionally use another leaf as a template.'''
@@ -118,46 +112,15 @@ def infuse(leaf, plate=None):
 	
 	fused = plate.copy()
 	fused.update(leaf)
-	#fused['content'] = str(fused['content']).format(**fused)
-	fused['content'] = str(plate['content']).format(**fused)
+	fused['text'] = str(fused['text']).format(**fused)
+	fused['text'] = str(plate['text']).format(**fused)
 	return fused
 
 def pour(leaf):
 	'''put an (infused) leaf in the right spot'''
 	with open(leaf['stem'] + leaf['tip'], 'w', encoding='utf-8',) as html:
-		html.write(leaf['content'])
+		html.write(leaf['text'])
 		
-	
-def steep(menu, pot, plate=None):
-	'''prepares special menu items. can optionally use another leaf as a template.'''
-	print('steeping: ' + menu['stem'])
-	if not plate:
-		plate = pick(menu['template'])
-
-	parameters = {
-	'show':'title', 
-	'length': None, 
-	'reverse': False, 
-	'header':str() }
-	
-	parameters.update(**menu['menu'])
-	fused = plate.copy()
-	fused.update(menu)
-	
-	content = ''
-	for leaf in strain(pot, parameters['show'], parameters['reverse'])[:parameters['length']]:
-		currentheader = parameters['header'].format(**leaf)
-		try:
-			if currentheader != oldheader:
-				content += currentheader
-		except UnboundLocalError:
-			content += currentheader
-		oldheader = currentheader
-		content += infuse(leaf,fused)['content']
-	fused['content'] = content
-	fused['content'] = str(plate['content']).format(**fused)
-	
-	return fused
 
 def brew(plate=None):
 	'''brew up a whole pot of tasty hot leaf juice'''
