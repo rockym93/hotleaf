@@ -62,7 +62,7 @@ def pick(filename, pot=[]):
 	leaf['stem'] = Stem(os.path.splitext(filename)[0])
 	leaf['tip'] = '.html'
 	leaf['summary'] = leaf['text'].strip().split('\n')[0]
-	leaf['template'] = '.template'
+	leaf['template'] = None
 
 	if not leaf['title']:
 		leaf['title'] = leaf['roots'][-1]
@@ -84,9 +84,9 @@ def pick(filename, pot=[]):
 		leaf.update(json.load(f))
 
 	#Add some helpers:
-	leaf['prev'] = Navigator(leaf,'prev', pot)]
-	leaf['next'] = Navigator(leaf,'next', pot)]
-	leaf['index'] = Indexer(pot)]
+	leaf['prev'] = Navigator(leaf,'prev', pot)
+	leaf['next'] = Navigator(leaf,'next', pot)
+	leaf['index'] = Indexer(pot)
 
 	return leaf
 
@@ -106,16 +106,16 @@ def scoop(tip='.txt'):
 	pot.sort(key=itemgetter('date'), reverse=True)
 	return pot
 	
-def infuse(leaf, plate=None):
+def infuse(leaf, plate):
 	'''produce output from a given leaf. can optionally use another leaf as a template.'''
-	#The actual main point of this function, and the reason we don't just use a format() instead,
-	#is becuase we have to merge a bunch of default values. If we didn't need to do that...
-	#Hmm. Okay. Do I even need default values any more? Or am I setting those from the file?
-	#I've simplified the metadata structure quite a lot - we're not really working with arbitrary 
-	#data from the file any more. The only reason to keep this function is so we can set some defaults
-	#in the template purely for the purpose of reassigning them later. 
+	#Okay, I'm keeping it. After all, infusing isn't something a leaf does to itself,
+	#it's something you do to a leaf. Let's try and keep at least some of the metaphor.
+	
+	#What I am changing is that we're switching from template-as-override to template-as-default
+	#The default is set here (meaning we can load it once and use it over and over) and if there's
+	#an override, it should be set by the file rather than by the program. If that makes sense.
 	print('infusing: ' + leaf['stem'])
-	if not plate:
+	if leaf['template']:
 		plate = pick(leaf['template'])
 	
 	fused = plate.copy()
