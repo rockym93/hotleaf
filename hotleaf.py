@@ -89,6 +89,8 @@ def pick(filename, pot=[]):
 		pass
 
 	#Add some helpers:
+	#The fact that these are class instantiations is forcing a copy of the pot object,
+	#when we're relying on it being a reference.
 	leaf['prev'] = Navigator(leaf,'prev', pot)
 	leaf['next'] = Navigator(leaf,'next', pot)
 	leaf['index'] = Indexer(pot)
