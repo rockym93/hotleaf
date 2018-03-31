@@ -45,7 +45,9 @@ class Navigator():
 		self.pot = Indexer(pot)
 	def __getitem__(self, search):
 		searched = list(self.pot[search])
-		index = searched.index(self.leaf)
+		poslist = [i['stem'] for i in searched]
+		print(poslist)
+		index = poslist.index(self.leaf['stem'])
 		if self.direction == 'prev':
 			return searched[index+1]
 		elif self.direction == 'next':
@@ -65,23 +67,26 @@ def pick(filename, pot=[]):
 	leaf['template'] = None
 
 	if not leaf['title']:
-		leaf['title'] = leaf['roots'][-1]
+		leaf['title'] = leaf['stem'][-1]
 	if not leaf['timestamp']:
 		leaf['timestamp'] = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
 	
 	leaf['text'] = markdown.markdown(leaf['text'])
 	leaf['tags'] = InfuseList(leaf['tags'])
 	
-	if os.path.exists(str(stem) + '.jpg'):
-		leaf['image'] = str(stem) + '.jpg'
-	elif os.path.exists(str(stem) + '.png'):
-		leaf['image'] = str(stem) + '.png'
+	if os.path.exists(str(leaf['stem']) + '.jpg'):
+		leaf['image'] = str(leaf['stem']) + '.jpg'
+	elif os.path.exists(str(leaf['stem']) + '.png'):
+		leaf['image'] = str(leaf['stem']) + '.png'
 	else:
 		leaf['image'] = "favicon.png"
 	
 	#Replace those defaults with page-specific text
-	with open(leaf['stem']+'.json') as f:
-		leaf.update(json.load(f))
+	try:
+		with open(leaf['stem']+'.json') as f:
+			leaf.update(json.load(f))
+	except FileNotFoundError:
+		pass
 
 	#Add some helpers:
 	leaf['prev'] = Navigator(leaf,'prev', pot)
@@ -101,7 +106,7 @@ def scoop(tip='.txt'):
 				path = directory[0] + '/' + filename
 				path = path.split('./',1)[1]
 				print('picking: ' + path)
-				pot.append(pick(path))
+				pot.append(pick(path,pot))
 			
 	pot.sort(key=itemgetter('date'), reverse=True)
 	return pot
