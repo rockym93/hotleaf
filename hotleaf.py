@@ -12,6 +12,11 @@ class Leaf(dict):
 		return formatstring.format(**self)
 	def __missing__(self, key):
 		return ''
+	def navsetup(self, pot):
+		'''Adds navigational helper classes'''
+		self['prev'] = Navigator(self,'prev', pot)
+		self['next'] = Navigator(self,'next', pot)
+		self['index'] = Indexer(pot)
 
 class Stem(str):
 	def __getitem__(self, index):
@@ -88,13 +93,6 @@ def pick(filename, pot=[]):
 	except FileNotFoundError:
 		pass
 
-	#Add some helpers:
-	#The fact that these are class instantiations is forcing a copy of the pot object,
-	#when we're relying on it being a reference.
-	leaf['prev'] = Navigator(leaf,'prev', pot)
-	leaf['next'] = Navigator(leaf,'next', pot)
-	leaf['index'] = Indexer(pot)
-
 	return leaf
 
 
@@ -109,7 +107,8 @@ def scoop(tip='.txt'):
 				path = path.split('./',1)[1]
 				print('picking: ' + path)
 				pot.append(pick(path,pot))
-			
+	for leaf in pot:
+		leaf.navsetup(pot)
 	pot.sort(key=itemgetter('date'), reverse=True)
 	return pot
 	

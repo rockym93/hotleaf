@@ -2,6 +2,6 @@
 
 Here are all the pages tagged with #test:
 
-{index[#test]:<a href="{{slug}}.html">{{title}}</a>}
+{index[#test]:<a href="{{stem}}.html">{{title}}</a>}
 
 #test

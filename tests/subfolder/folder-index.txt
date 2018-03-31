@@ -2,6 +2,6 @@
 
 Here are all the pages under the subfolder /subfolder:
 
-{index[/subfolder]:<a href="{{slug}}.html">{{title}}</a>}
+{index[/subfolder]:<a href="{{stem}}.html">{{title}}</a>}
 
 #misc
