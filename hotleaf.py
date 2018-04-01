@@ -29,11 +29,11 @@ class InfuseList(list):
 		for i in self:
 			try:
 				returnstring += formatstring.format(**i)
-			except SyntaxError:
+			except TypeError:
 				returnstring += formatstring.format(i)
 		return returnstring
 	def __getitem__(self, search):
-		return [i for i in self if search in i]
+		return InfuseList([i for i in self if i == search])
 
 class Indexer(InfuseList):
 	'''a list which gets items by search string, rather than by index'''
