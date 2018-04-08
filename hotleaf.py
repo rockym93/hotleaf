@@ -25,23 +25,27 @@ class Stem(str):
 class InfuseList(list):
 	'''a list that can infuse each of its members'''
 	def __format__(self, formatstring):
+		print(self)
+		print
 		returnstring = ''
 		for i in self:
-			try:
-				returnstring += formatstring.format(**i)
-			except TypeError:
-				returnstring += formatstring.format(i)
+			returnstring += formatstring.format(i)
 		return returnstring
-	def __getitem__(self, search):
-		return InfuseList([i for i in self if i == search])
+#	def __getitem__(self,index):
+#		return InfuseList(list.__getitem__(list(self),index))
 
-class Indexer(InfuseList):
+class Indexer(list):
 	'''a list which gets items by search string, rather than by index'''
 	def __getitem__(self, search):
 		if search[0] == '#': # tag
-			return InfuseList([leaf for leaf in self if search[1:] in leaf['tags']])
+			return Indexer([leaf for leaf in self if search[1:] in leaf['tags']])
 		elif search[0] == '/': # path
-			return InfuseList([leaf for leaf in self if search[1:] in str(leaf['stem'])])
+			return Indexer([leaf for leaf in self if search[1:] in leaf['stem'].split('/')])
+	def __format__(self, formatstring):
+		returnstring = ''
+		for i in self:
+			returnstring += formatstring.format(**i)
+		return returnstring
 
 class Navigator():
 	def __init__(self, leaf, direction, pot):
@@ -58,6 +62,14 @@ class Navigator():
 		elif self.direction == 'next':
 			return searched[index-1]
 
+class Conditional():
+	def __init__(self, leaf):
+		self.leaf = leaf
+	def __getitem__(self, search):
+		if search[0] == '#': # tag
+			return InfuseList([i for i in self.leaf['tags'] if i == search[1:]] )
+		elif search[0] == '/': # path
+			return InfuseList([i for i in self.leaf['stem'].split('/') if i == search[1:]] )
 
 
 def pick(filename, pot=[]):
@@ -107,9 +119,12 @@ def scoop(tip='.txt'):
 				path = path.split('./',1)[1]
 				print('picking: ' + path)
 				pot.append(pick(path,pot))
+
+	pot.sort(key=itemgetter('timestamp'), reverse=True)
+
 	for leaf in pot:
 		leaf.navsetup(pot)
-	pot.sort(key=itemgetter('date'), reverse=True)
+
 	return pot
 	
 def infuse(leaf, plate):
@@ -117,13 +132,15 @@ def infuse(leaf, plate):
 
 	print('infusing: ' + leaf['stem'])
 	if leaf['template']:
-		plate = pick(leaf['template'])
+		with open(leaf['template'],encoding='utf-8',) as f:
+			plate = f.read()
+#		plate = pick(leaf['template'])
 	
-	fused = plate.copy()
-	fused.update(leaf)
-	fused['text'] = str(fused['text']).format(**fused)
-	fused['text'] = str(plate['text']).format(**fused)
-	return fused
+#	fused = plate.copy()
+#	fused.update(leaf)
+	leaf['text'] = leaf['text'].format(**leaf)
+	leaf['text'] = plate.format(**leaf)
+	return leaf
 
 def pour(leaf):
 	'''put an (infused) leaf in the right spot'''
@@ -140,5 +157,6 @@ def brew(plate):
 
 
 if __name__ == "__main__":
-	plate = pick('.template')	#TODO: Have this set from command line parameters.
+	with open('.template',encoding='utf-8',) as f: #TODO: Have this set from command line parameters.
+		plate = f.read()
 	brew(plate)
