@@ -17,35 +17,37 @@ class Leaf(dict):
 		self['prev'] = Navigator(self,'prev', pot)
 		self['next'] = Navigator(self,'next', pot)
 		self['index'] = Indexer(pot)
+		self['if'] = Conditional(self)
 
 class Stem(str):
 	def __getitem__(self, index):
-		return self.split('/')[index]
+		return self.split('/')[index] #Returns list
 
 class InfuseList(list):
 	'''a list that can infuse each of its members'''
 	def __format__(self, formatstring):
 		print(self)
-		print
 		returnstring = ''
 		for i in self:
 			returnstring += formatstring.format(i)
-		return returnstring
+		return returnstring #Returns string
 #	def __getitem__(self,index):
 #		return InfuseList(list.__getitem__(list(self),index))
 
 class Indexer(list):
 	'''a list which gets items by search string, rather than by index'''
 	def __getitem__(self, search):
-		if search[0] == '#': # tag
+		if type(search) is int:
+			return list(self)[search] #Returns leaf
+		elif search[0] == '#': # tag; returns Indexer
 			return Indexer([leaf for leaf in self if search[1:] in leaf['tags']])
-		elif search[0] == '/': # path
-			return Indexer([leaf for leaf in self if search[1:] in leaf['stem'].split('/')])
+		elif search[0] == '/': # path; returns Indexer
+			return Indexer([leaf for leaf in self if search[1:] in leaf['stem']])
 	def __format__(self, formatstring):
 		returnstring = ''
 		for i in self:
 			returnstring += formatstring.format(**i)
-		return returnstring
+		return returnstring #Returns string
 
 class Navigator():
 	def __init__(self, leaf, direction, pot):
@@ -55,21 +57,21 @@ class Navigator():
 	def __getitem__(self, search):
 		searched = list(self.pot[search])
 		poslist = [i['stem'] for i in searched]
-		print(poslist)
 		index = poslist.index(self.leaf['stem'])
+
 		if self.direction == 'prev':
-			return searched[index+1]
+			return searched[index+1] #Returns leaf
 		elif self.direction == 'next':
-			return searched[index-1]
+			return searched[index-1] #Returns leaf
 
 class Conditional():
 	def __init__(self, leaf):
 		self.leaf = leaf
 	def __getitem__(self, search):
 		if search[0] == '#': # tag
-			return InfuseList([i for i in self.leaf['tags'] if i == search[1:]] )
+			return InfuseList([i for i in self.leaf['tags'] if search[1:] in i]) #Returns len==0/1 Infuselist
 		elif search[0] == '/': # path
-			return InfuseList([i for i in self.leaf['stem'].split('/') if i == search[1:]] )
+			return InfuseList([i for i in self.leaf['stem'] if search[1:] in i]) #Returns len==0/1 Infuselist
 
 
 def pick(filename, pot=[]):
