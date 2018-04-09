@@ -65,14 +65,25 @@ class Navigator():
 			return searched[index-1] #Returns leaf
 
 class Conditional():
-	def __init__(self, leaf):
+	def __init__(self, leaf, state=False):
 		self.leaf = leaf
+		self.state = state
 	def __getitem__(self, search):
 		if search[0] == '#': # tag
-			return InfuseList([i for i in self.leaf['tags'] if search[1:] in i]) #Returns len==0/1 Infuselist
+			if search[1:] in self.leaf['tags']:
+				return  Conditional(self.leaf, True)
+			else:
+				return self
 		elif search[0] == '/': # path
-			return InfuseList([i for i in self.leaf['stem'] if search[1:] in i]) #Returns len==0/1 Infuselist
-
+			if search[1:] in self.leaf['stem']:
+				return  Conditional(self.leaf, True)
+			else:
+				return self
+	def __format__(self, formatstring):
+		if self.state:
+			return formatstring
+		else:
+			return ''
 
 def pick(filename, pot=[]):
 	'''pick a leaf up from a file ready for brewing'''
