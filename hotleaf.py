@@ -81,7 +81,7 @@ class Conditional():
 				return self
 	def __format__(self, formatstring):
 		if self.state:
-			return formatstring
+			return formatstring.format(**self.leaf)
 		else:
 			return ''
 
@@ -93,7 +93,7 @@ def pick(filename, pot=[]):
 	#Set some sensible defaults
 	leaf['stem'] = Stem(os.path.splitext(filename)[0])
 	leaf['tip'] = '.html'
-	leaf['summary'] = leaf['text'].strip().split('\n')[0]
+	leaf['summary'],leaf['image'] = sandwich.markstrip(leaf['text'].strip().splitlines()[0])
 	leaf['template'] = None
 
 	if not leaf['title']:
@@ -104,14 +104,17 @@ def pick(filename, pot=[]):
 	leaf['text'] = markdown.markdown(leaf['text'])
 	leaf['tags'] = InfuseList(leaf['tags'])
 	
-	if os.path.exists(str(leaf['stem']) + '.jpg'):
-		leaf['image'] = str(leaf['stem']) + '.jpg'
-	elif os.path.exists(str(leaf['stem']) + '.png'):
-		leaf['image'] = str(leaf['stem']) + '.png'
-	else:
-		leaf['image'] = "favicon.png"
+	#If there's an image file with the same name, use it. Otherwise, use the site icon.
+	if not leaf['image']:
+		if os.path.exists(str(leaf['stem']) + '.jpg'):
+			leaf['image'] = str(leaf['stem']) + '.jpg'
+		elif os.path.exists(str(leaf['stem']) + '.png'):
+			leaf['image'] = str(leaf['stem']) + '.png'
+		else:
+			leaf['image'] = "favicon.png"
+
 	
-	#Replace those defaults with page-specific text
+	#Replace defaults with page-specific metadata (if it exists)
 	try:
 		with open(leaf['stem']+'.json') as f:
 			leaf.update(json.load(f))

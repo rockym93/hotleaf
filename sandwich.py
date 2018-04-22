@@ -8,33 +8,29 @@ import datetime
 def load(text):
 	'''processes a text file into a sandwich object with metadata'''
 	sandwich = {}
-	headline = text.splitlines()[0]
-	tagline = text.splitlines()[-1]
-	text = '\n'.join(text.splitlines()[1:-1])
+	lines = text.strip().splitlines()
+	headline = lines[0].strip()
+	del lines[0]
 
-	try: 
-		sandwich['timestamp'] = dateutil.parser.parse(tagline.split("#")[0])
-	except ValueError:
+	if lines[-1].strip()[0] in '#<': #if tags or timestamp present on last line
+		tagline = lines[-1] #set the tagline
+		del lines[-1] #remove it from the text
+	text = '\n'.join(lines)
+
+	if tagline[0] is '<': #if a date is present
+		timestamp = tagline.split('>')[0].strip(' <>')
+		try:
+			sandwich['timestamp'] = dateutil.parser.parse(timestamp)
+		except ValueError:
+			print("Invalid date")
+			sandwich['timestamp'] = None
+	else:
 		sandwich['timestamp'] = None
 	sandwich['title'] = headline.strip("# ")
-	sandwich['tags'] = [tag.strip() for tag in tagline.split("#")[1:]]
+	sandwich['tags'] = [tag.strip() for tag in tagline.split("#")[1:]] #everything from the first tag on
 	sandwich['text'] = text
 
-	try:
-		finaltag = tagline.split('!')[1]
-		try:
-			sandwich['tags'].append(sandwich['tags'].pop().split(' !')[0].strip()) #remove the meta from final tag
-		except IndexError:
-			pass
-		sandwich['summary'] = finaltag.split('](')[0].strip('[')
-		if not sandwich['summary']:
-			sandwich['summary'] = text.splitlines()[0]
-		sandwich['image'] = finaltag.split('](')[1].strip(')')
-		if not sandwich['image']:
-			sandwich['image'] = None
-	except IndexError:
-		sandwich['summary'] = text.splitlines()[0] #first line of text
-		sandwich['image'] = None
+
 	
 
 #	# These could be used as defaults - if we knew what the filename was, which we don't.
@@ -47,7 +43,7 @@ def dump(sandwich):
 	'''processes a sandwich object into a text file'''
 	text = ''
 	try: 
-		tagline = [sandwich['timestamp'].isoformat()] + sandwich['tags']
+		tagline = ['<'+sandwich['timestamp'].isoformat()+'>'] + sandwich['tags']
 	except AttributeError:
 		tagline = [''] + sandwich['tags']
 	
@@ -55,25 +51,25 @@ def dump(sandwich):
 	if sandwich['title']:
 		text += '# ' + sandwich['title']
 	text += '\n' + sandwich['text']
-	text += '\n' + ' #'.join(tagline)
+	text += '\n\n' + ' #'.join(tagline)
 
-	try:
-		if sandwich['summary'] == sandwich['text'].splitlines()[0]:
-			sandwich['summary'] = ''
-	except KeyError:
-		sandwich['summary'] = ''
-	
-	try:
-		if not sandwich['image']:
-			sandwich['image'] = ''
-	except KeyError:
-		sandwich['image'] = ''
-
-	if sandwich['image'] or sandwich['summary']:
-		text += ' ![{summary}]({image})'.format(**sandwich)
-	
 	return text
 
+def markstrip(text):
+	image = None
+	if '](' in text:
+		while '](' in text:
+			p = text.split('](', maxsplit=1)
+			q = p[1].split(')', maxsplit=1)
+			if '![' in p[0]:
+				image = q[0]
+			p.append(q[1])
+			del p[1]
+			text = ''.join(p)
+		text = text.replace('![','')
+		text = text.replace('[','')
+	return text,image
+			
 
 # if __name__ == "__main__":
 # 	import argparse
