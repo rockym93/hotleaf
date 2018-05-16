@@ -60,9 +60,16 @@ class Navigator():
 		index = poslist.index(self.leaf['stem'])
 
 		if self.direction == 'prev':
-			return searched[index+1] #Returns leaf
+			try:
+				return searched[index+1] #Returns leaf
+			except IndexError:
+				return self.leaf #return this post if if this is the oldest post
 		elif self.direction == 'next':
-			return searched[index-1] #Returns leaf
+			if index != 0:
+				return searched[index-1] #Returns leaf
+			else:
+				return self.leaf #return this post if if this is the oldest post
+
 
 class Conditional():
 	def __init__(self, leaf, state=False):
