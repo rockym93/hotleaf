@@ -3,6 +3,7 @@
 import os
 import yaml
 import sandwich
+import json
 
 def grade(raw):
 	'''separate raw materials into metadata and text content'''
@@ -23,12 +24,20 @@ def scoop():
 			if os.path.splitext(filename)[1] == '.txt':
 				path = directory[0] + '/' + filename
 				path = path.split('./',1)[1]
-				print('picking: ' + path)
+#				print('picking: ' + path)
 				with open(path, encoding='utf-8') as f:
 					raw, meta = grade(f.read())
-				leaf = {}
-				leaf["stem"] = path
-				leaf["text"] = raw.strip()
+				leaf = {} #this stuff goes in the text file
+				leaf["sidecar"] = {} #this stuff goes in the sidecar file
+				leaf["stem"] = path.rsplit('.', maxsplit=1)[0]
+				raw = raw.strip()
+				if path.split('/')[0] == 'blog':
+					if path.split('/')[1] < '2013':
+						if '\n  \n' in raw:
+							raw = raw.replace('\n  \n','\n\n')
+						raw = raw.replace('\n\n','<BR>').replace('\n',' ').replace('<BR>','\n\n')
+
+				leaf["text"] = raw 
 				if 'image' not in meta.keys():
 					leaf['image'] = None
 				try:
@@ -36,13 +45,16 @@ def scoop():
 				except KeyError:
 					leaf["title"] = ''
 				try:
-					leaf["summary"] = meta["summary"]
+					leaf["sidecar"]["summary"] = meta["summary"]
 				except KeyError:
-					leaf["summary"] = ''
+					pass
 				try:
-					leaf["image"] = meta["image"]
+					if meta['image'].rsplit('.', maxsplit=1)[0] != leaf['stem']: #if it's not the same as the text file name
+						leaf["sidecar"]["image"] = meta["image"]
+					if leaf["sidecar"]["image"] == "favicon.png":
+						del leaf["sidecar"]["image"] 
 				except KeyError:
-					leaf["image"] = None
+					pass
 				try:
 					leaf["timestamp"] = meta["blog"] #whatever the newest timestamp is - it could be under any key... >_<
 				except KeyError:
@@ -56,8 +68,13 @@ def scoop():
 
 def pour(leaf):
 	'''put a reformatted leaf in the right spot'''
-	with open(leaf['stem'], 'w', encoding='utf-8',) as txt:
+	with open(leaf['stem'] + '.new', 'w', encoding='utf-8',) as txt:
 		txt.write(sandwich.dump(leaf))
+	if leaf["sidecar"]:
+		with open(leaf['stem'] + '.json', 'w', encoding='utf-8',) as txt:
+			txt.write(json.dumps(leaf["sidecar"]))
+
+	
 
 if __name__ == "__main__":
 	pot = scoop()
