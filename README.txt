@@ -30,18 +30,20 @@ Usage
 
 Formatting
 ----------
+
+*(File formatting has changed since past versions! There's a convert script in here, but you'll need to modify it a bit.)*
+
 Hot Leaf Juice turns text files into html files with the same name. Those text files contain your content, formatted as [Markdown](https://daringfireball.net/projects/markdown/syntax).
 
-At the start of each file, you can put some YAML. This will let you set different bits of metadata for that page. These might be tags, or dates, or navigational elements, which need to be different on every page, and that you don't want to hand-write in.
+Text files are written as a hashtag sandwich. 
 
-Start this section with three dashes (---), on the very first line of your file. YAML can be a bit complex, but the gist of it is that you have names and values, separated by a colon:
+The first line is your title, which starts with a # symbol as if it were a Markdown title.
 
-  ---
-  title: Example Page
-  date: 2017-10-31
-  ---
-  
-Once you're done setting your data, end the YAML document with three dashes (---). Then start your actual document.
+The last line is a series of actual hashtags, which are your file tags. It can also include a date, wrapped in <angle brackets>. So your tagline might look like this:
+
+  <2018-01-21> #blog #news #tea #sandwiches
+
+A title is compulsory, but the tagline is optional.
 
 Templates
 ---------
@@ -49,9 +51,9 @@ Templates are the files that your content gets pasted into. Like pages, they sta
 
 In the main part of your template, you can reference any metadata you've set in the document, any metadata set in the template, and any metadata that Hot Leaf Juice sets automatically. Data from the document overwrites automatic data, and both overwrite data from the template.
 
-Metadata goes between curly braces. If you had a variable called 'tag', you could reference it like this:
+Metadata goes between curly braces. 
 
-  {{tag}}
+  {{title}}
 
 If you need to use an actual curly brace character, you can double them up, like so:
 
@@ -63,42 +65,38 @@ There is some more complex stuff you can do with these, like formatting date dat
 
 You can include tags like this in both your content and your template.
 
+
+
 ### Automatic tags ###
 
 Hot Leaf Juice fills some tags automatically. 
 
-{{stem}} contains the source file's path, without the extension.
-{{roots}} contains the source file's path, split up into subfolders. You can reference individual components with square brackets, like this:
-  {{roots[0]}} 
-{{title}} is automatically set to the file name, with no extension (or {{roots[-1]}})
-{{content}} is filled with your formatted html. Use this to actually include your content in your template.
+{{stem}} contains the source file's path, without the extension. You can reference individual folders with square brackets, like this:
+  {{stem[0]}} 
+{{title}} is automatically set to the file name, with no extension.
+{{text}} is filled with your formatted html. Use this to actually include your content in your template.
 {{summary}} is set to the first line of your text.
+{{image}} is set to the image file with the same name as your text file.
+{{timestamp}} is set to the file modified date, unless you've set one in the tagline.
 
-You can override these in the file's metadata section. Note that changing 'stem' will cause your html file to end up at the new location rather than right next to your text files.
+If you need extra stuff, Hot Leaf Juice also reads a .json file with the same title as your text file, and those keys/values are accessible through {{brackets}} as well.
 
-### Menus ###
+### Magic tags ###
 
-There's one more special metadata structure, the menu. This is only active in files that end in .menu, which get processed differently.
+Hot Leaf Juice can also do some more complex stuff with tags.
 
-Menus can be used to make a site map, or a tag list, or an archive, or a blog front page. They work by using their text content as the template for several pages which have a particular bit of metadata set, and then using that as the content for the page. Essentially, they let you stack a set of pages together.
+{{tags:(some formatting)}} will list your tags, and fill out the formatting string for each one. {{{{}}}} will be replaced with the tag. For example:
+  {{tags:tagged with {{{{}}}} }}
 
-You can tell it which pages, how many, and in what order using metadata tags:
-  menu:
-    show: blog
-    length: 5
-    header: {date:%Y}
-    reverse: True
+{{index[#tag]:(some formatting)}} will list everything under a particular tag, and fill out the formatting string for each one. The tags in the formatting string are the same as the tags in your text, but with two brackets instead of one.
+  {{index[#blog]:<a href="{{{{stem}}}}.html">{{{{title}}}}</a>}}
 
-show: tells Hot Leaf Juice which bit of metadata it's looking for.
-length: controls how many of those we show.
-header: is a bit of text that's inserted every time it changes - it can include metadata tags.
-reverse: reverses the order of the pages. Pages are sorted before being shown.
+{{prev[#tag]}} and {{next[tag]}} return the previous and next posts, chronologically, in a particular tag.
 
-The indent is important! Your menu won't work without it.
+{{if[#tag]:(some text)}} will show some text only if a post is tagged with a particular tag. Useful for turning page elements on and off in your template.
 
-You'll also need to set what you want shown for each page. That gets set in the content area of the menu file.
+These give you just enough indexing to do a simple blog, with previous and next links, tags, and an archive/feed/front page. They can interact with each other in some weird ways, so I'd recommend against trying to nest them.
 
-There are some examples of menus in tests/index.
 
 Hacking
 -------
@@ -109,16 +107,7 @@ Hot Leaf Juice should be pretty easy to repurpose. You can import it into your o
 
 It's broken up into functions, and they're all pretty self explanatory - if slightly whimsically named. 
 
-This is actually how I use Hot Leaf Juice: I have a separate script of a couple of lines that builds my site the way I want it to, doing different subsets of pages with different templates. That script looks a bit like this:
-   
-  #!/usr/bin/env python3
-  import hotleaf
-  
-  hotleaf.brew()
-  
-  plate = hotleaf.pick('blog/blog.template')
-  for blog in hotleaf.strain(hotleaf.scoop('.txt'), 'blog'):
-    hotleaf.pour(hotleaf.infuse(blog, plate))
+The stuff for interpreting the file format is under sandwich.py - it implements a standard load() and dump() interface, to help you get your data in and out of Hot Leaf Juice safely.
 
 If you have any questions, or if you end up using Hot Leaf Juice for your own site, feel free to shoot me an email at hotleaf@rockym93.net.
 
