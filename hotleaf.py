@@ -145,6 +145,9 @@ def scoop(tip='.txt'):
 
 	pot.sort(key=itemgetter('timestamp'), reverse=True)
 
+	now = datetime.datetime.now()
+	pot = [leaf for leaf in pot if leaf['timestamp'] < now] #exclude future-dated posts
+
 	for leaf in pot:
 		leaf.navsetup(pot)
 	for leaf in pot:
