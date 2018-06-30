@@ -101,7 +101,7 @@ def pick(filename, pot=[]):
 	leaf['stem'] = Stem(os.path.splitext(filename)[0])
 	leaf['tip'] = '.html'
 	leaf['summary'],leaf['image'] = sandwich.markstrip(leaf['text'].strip().splitlines()[0])
-	leaf['template'] = None
+	leaf['template'] = '.template'
 
 	if not leaf['title']:
 		leaf['title'] = leaf['stem'][-1]
@@ -151,36 +151,28 @@ def scoop(tip='.txt'):
 		leaf['text'] = leaf['text'].format(**leaf)
 	return pot
 	
-def infuse(leaf, plate):
-	'''produce output from a given leaf. can optionally use another leaf as a template.'''
+def infuse(leaf):
+	'''produce output from a given leaf.'''
 
 	print('infusing: ' + leaf['stem'])
-	if leaf['template']:
-		with open(leaf['template'],encoding='utf-8',) as f:
-			plate = f.read()
-#		plate = pick(leaf['template'])
-	
-#	fused = plate.copy()
-#	fused.update(leaf)
+	with open(leaf['template'],encoding='utf-8',) as f:
+		plate = f.read()
 
-	leaf['infusion'] = plate.format(**leaf)
-	return leaf
+	return plate.format(**leaf)
 
 def pour(leaf):
-	'''put an (infused) leaf in the right spot'''
+	'''put a leaf in the right spot'''
 	with open(leaf['stem'] + leaf['tip'], 'w', encoding='utf-8',) as html:
-		html.write(leaf['infusion'])
+		html.write(infuse(leaf))
 		
 
-def brew(plate):
+def brew():
 	'''brew up a whole pot of tasty hot leaf juice'''
 	pot = scoop('.txt')
 	for leaf in pot:
-		pour(infuse(leaf, plate))
+		pour(leaf)
 
 
 
 if __name__ == "__main__":
-	with open('.template',encoding='utf-8',) as f: #TODO: Have this set from command line parameters.
-		plate = f.read()
-	brew(plate)
+	brew()
