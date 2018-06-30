@@ -147,7 +147,8 @@ def scoop(tip='.txt'):
 
 	for leaf in pot:
 		leaf.navsetup(pot)
-
+	for leaf in pot:
+		leaf['text'] = leaf['text'].format(**leaf)
 	return pot
 	
 def infuse(leaf, plate):
@@ -161,14 +162,14 @@ def infuse(leaf, plate):
 	
 #	fused = plate.copy()
 #	fused.update(leaf)
-	leaf['text'] = leaf['text'].format(**leaf)
-	leaf['text'] = plate.format(**leaf)
+
+	leaf['infusion'] = plate.format(**leaf)
 	return leaf
 
 def pour(leaf):
 	'''put an (infused) leaf in the right spot'''
 	with open(leaf['stem'] + leaf['tip'], 'w', encoding='utf-8',) as html:
-		html.write(leaf['text'])
+		html.write(leaf['infusion'])
 		
 
 def brew(plate):

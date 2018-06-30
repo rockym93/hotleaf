@@ -1,11 +1,3 @@
----
-title: Hot Leaf Juice
-summary: A really basic static site generator.
-image: /code/hotleaf.png
----
-<https://github.com/rockym93/hotleaf>
-
-
 What is Hot Leaf Juice?
 -----------------------
 
