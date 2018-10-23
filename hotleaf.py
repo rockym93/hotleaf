@@ -29,7 +29,8 @@ class InfuseList(list):
 		print(self)
 		returnstring = ''
 		for i in self:
-			returnstring += formatstring.format(i)
+			if i[0] != '!': #ignore hidden tags
+				returnstring += formatstring.format(i)
 		return returnstring #Returns string
 #	def __getitem__(self,index):
 #		return InfuseList(list.__getitem__(list(self),index))
